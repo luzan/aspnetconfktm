@@ -1,0 +1,48 @@
+name: "Build and Deploy"
+
+on: 
+  push:
+    braches:
+      - master
+
+env:
+  AZURE_WEBAPP: 'aspconfktm'
+  AZURE_PACKAGE_PATH: './published'
+  NETCORE_VERSION: '3.1.103'
+
+jobs:
+  build:
+    name: "Build and Deploy"
+    runs-on: "windows-latest"
+    steps:
+      - uses: actions/checkout@v2
+    
+      - name: Setup .NET Core SDK ${{ env.NETCORE_VERSION }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.NETCORE_VERSION }}
+      
+      - name: Restore Package
+        run: dotnet restore
+
+      - name: Build App
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test App
+        run: dotnet test --no-build
+
+      - name: Generate Package for Deployment
+        run: dotnet publish --configuration Release --no-build -o ${{ env.AZURE_PACKAGE_PATH }}
+
+      - name: Login to AZUR
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          enable-AzPSSession: true
+      
+      - name: Deploy to azure
+        uses: azure/webapps-deploy@v1
+          with:
+              app-name: ${{ env.AZURE_WEBAPP }}
+              publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+              package: ${{ env.AZURE_PACKAGE_PATH }}
