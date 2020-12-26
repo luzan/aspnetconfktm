@@ -42,7 +42,7 @@ jobs:
       
       - name: Deploy to azure
         uses: azure/webapps-deploy@v1
-          with:
-              app-name: ${{ env.AZURE_WEBAPP }}
-              publish-profile: ${{ secrets.PUBLISH_PROFILE }}
-              package: ${{ env.AZURE_PACKAGE_PATH }}
+        with:
+          app-name: ${{ env.AZURE_WEBAPP }}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_PACKAGE_PATH }}
